@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+    <title>Chụp ảnh bằng jQuery Webcam</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.25/webcam.min.js"></script>
+    <style>
+        video,
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Chụp ảnh bằng jQuery Webcam</h1>
+    <div>
+        <button class="btn btn-primary" style="width: 200px;height: 100px;" id="start-camera">Bật camera</button>
+        <button class="btn btn-warning" style="width: 200px;height: 100px;" id="startbutton">Chụp ảnh</button>
+        <button class="btn btn-success" style="width: 200px;height: 100px;" id="snap">Lưu</button>
+    </div>
+    <div>
+        <video id="video" width="640" height="480"></video>
+        <canvas id="canvas" width="640" height="480"></canvas>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            var video = document.getElementById("video");
+            var canvas = document.getElementById("canvas");
+            var startbutton = document.getElementById("startbutton");
+            var context = canvas.getContext('2d');
+            var snap = document.getElementById('snap');
+
+            var width = 640;
+            var height = 480;
+            // Kết nối tới camera
+            $("#start-camera").click(function () {
+                // Get access to the camera
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices
+                        .getUserMedia({ video: true })
+                        .then(function (stream) {
+                            video.srcObject = stream;
+                            video.play();
+                        });
+                }
+            });
+
+            // Chụp ảnh
+            startbutton.addEventListener("click", function () {
+                canvas.getContext("2d").drawImage(video, 0, 0, width, height);
+            });
+
+            //Save ảnh
+            snap.addEventListener("click", function () {
+                context.drawImage(video, 0, 0, 640, 480);
+                var imgData = canvas.toDataURL();
+                $.ajax({
+                    type: "POST",
+                    url: "saveimg.php",
+                    data: { imageData: imgData }
+                }).done(function (response) {
+                    alert(response);
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
